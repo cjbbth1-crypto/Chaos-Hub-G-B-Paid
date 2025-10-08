@@ -10,26 +10,31 @@ espIToggled = false
 espCuToogled = false
 espBossToggled = false
 
-local bossFolder = workspace["Sleepy Hollow"].Modes.Boss.HeadlessHorsemanBoss
+local bossFolder = nil
+pcall(function()
+    bossFolder = workspace:WaitForChild("Sleepy Hollow", 10).Modes.Boss.HeadlessHorsemanBoss
+end)
 
-bossFolder.ChildAdded:Connect(
-    function(child)
+if bossFolder then
+    bossFolder.ChildAdded:Connect(
+        function(child)
+            if espBossToggled then
+                local Highlight = Instance.new("Highlight")
+                Highlight.Parent = child
+                Highlight.Adornee = child
+                Highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            end
+        end
+    )
+
+    -- Apply to existing children if any
+    for _, child in pairs(bossFolder:GetChildren()) do
         if espBossToggled then
             local Highlight = Instance.new("Highlight")
             Highlight.Parent = child
             Highlight.Adornee = child
             Highlight.FillColor = Color3.fromRGB(255, 0, 0)
         end
-    end
-)
-
--- Apply to existing children if any
-for _, child in pairs(bossFolder:GetChildren()) do
-    if espBossToggled then
-        local Highlight = Instance.new("Highlight")
-        Highlight.Parent = child
-        Highlight.Adornee = child
-        Highlight.FillColor = Color3.fromRGB(255, 0, 0)
     end
 end
 
@@ -1547,19 +1552,21 @@ local esp_Boss = esp_Tab:CreateToggle({
     Flag = "ESP_5",
     Callback = function(Value)
         espBossToggled = Value
-        if Value then
-            for _, child in pairs(bossFolder:GetChildren()) do
-                if not child:FindFirstChild("Highlight") then
-                    local Highlight = Instance.new("Highlight")
-                    Highlight.Parent = child
-                    Highlight.Adornee = child
-                    Highlight.FillColor = Color3.fromRGB(255, 0, 0)
+        if bossFolder then
+            if Value then
+                for _, child in pairs(bossFolder:GetChildren()) do
+                    if not child:FindFirstChild("Highlight") then
+                        local Highlight = Instance.new("Highlight")
+                        Highlight.Parent = child
+                        Highlight.Adornee = child
+                        Highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    end
                 end
-            end
-        else
-            for _, child in pairs(bossFolder:GetChildren()) do
-                if child:FindFirstChild("Highlight") then
-                    child.Highlight:Destroy()
+            else
+                for _, child in pairs(bossFolder:GetChildren()) do
+                    if child:FindFirstChild("Highlight") then
+                        child.Highlight:Destroy()
+                    end
                 end
             end
         end
