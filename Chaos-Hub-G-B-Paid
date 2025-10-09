@@ -3,7 +3,7 @@ local success, errorMsg = pcall(function()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
 
--- ESP
+-- ESP Variables
 espRToggled = false
 espBToggled = false
 espIToggled = false
@@ -16,18 +16,15 @@ pcall(function()
 end)
 
 if bossFolder then
-    bossFolder.ChildAdded:Connect(
-        function(child)
-            if espBossToggled then
-                local Highlight = Instance.new("Highlight")
-                Highlight.Parent = child
-                Highlight.Adornee = child
-                Highlight.FillColor = Color3.fromRGB(255, 0, 0)
-            end
+    bossFolder.ChildAdded:Connect(function(child)
+        if espBossToggled then
+            local Highlight = Instance.new("Highlight")
+            Highlight.Parent = child
+            Highlight.Adornee = child
+            Highlight.FillColor = Color3.fromRGB(255, 0, 0)
         end
-    )
+    end)
 
-    -- Apply to existing children if any
     for _, child in pairs(bossFolder:GetChildren()) do
         if espBossToggled then
             local Highlight = Instance.new("Highlight")
@@ -38,49 +35,42 @@ if bossFolder then
     end
 end
 
-workspace.Camera.ChildAdded:Connect(
-    function(child)
-        if child.Name == "m_Zombie" then
-            local Origin = child:WaitForChild("Orig", 5)
-            if Origin and Origin.Value ~= nil then
-                local zombie = Origin.Value:FindFirstChild("Zombie")
-                if not zombie then return end
-                
-                if espRToggled then
-                    if zombie.WalkSpeed > 16 then
-                        local Highlight = Instance.new("Highlight")
-                        Highlight.Parent = child
-                        Highlight.Adornee = child
-                    end
-                end
-                if espBToggled then
-                    if child:FindFirstChild("Barrel") ~= nil then
-                        local Highlight = Instance.new("Highlight")
-                        Highlight.Parent = child
-                        Highlight.Adornee = child
-                        Highlight.FillColor = Color3.fromRGB(65,105,225)
-                    end
-                end
-                if espIToggled then 
-                    if child:FindFirstChild("Whale Oil Lantern") ~= nil then
-                        local Highlight = Instance.new("Highlight")
-                        Highlight.Parent = child
-                        Highlight.Adornee = child
-                        Highlight.FillColor = Color3.fromRGB(255,255,51)
-                    end
-                end
-                if espCuToogled then
-                    if child:FindFirstChild("Sword") ~= nil then
-                        local Highlight = Instance.new("Highlight")
-                        Highlight.Parent = child
-                        Highlight.Adornee = child
-                        Highlight.FillColor = Color3.fromRGB(65,105,225)  
-                    end
-                end       
+workspace.Camera.ChildAdded:Connect(function(child)
+    if child.Name == "m_Zombie" then
+        local Origin = child:WaitForChild("Orig", 5)
+        if Origin and Origin.Value ~= nil then
+            local zombie = Origin.Value:FindFirstChild("Zombie")
+            if not zombie then return end
+            
+            if espRToggled and zombie.WalkSpeed > 16 then
+                local Highlight = Instance.new("Highlight")
+                Highlight.Parent = child
+                Highlight.Adornee = child
+            end
+            
+            if espBToggled and child:FindFirstChild("Barrel") ~= nil then
+                local Highlight = Instance.new("Highlight")
+                Highlight.Parent = child
+                Highlight.Adornee = child
+                Highlight.FillColor = Color3.fromRGB(65,105,225)
+            end
+            
+            if espIToggled and child:FindFirstChild("Whale Oil Lantern") ~= nil then
+                local Highlight = Instance.new("Highlight")
+                Highlight.Parent = child
+                Highlight.Adornee = child
+                Highlight.FillColor = Color3.fromRGB(255,255,51)
+            end
+            
+            if espCuToogled and child:FindFirstChild("Sword") ~= nil then
+                local Highlight = Instance.new("Highlight")
+                Highlight.Parent = child
+                Highlight.Adornee = child
+                Highlight.FillColor = Color3.fromRGB(65,105,225)  
             end
         end
     end
-)
+end)
 
 -- ESP Players
 espLifeToggled = false
@@ -89,8 +79,8 @@ function checkPlayersLife()
     if espLifeToggled == false then
         local Players = workspace.Players:GetChildren()
         for i, player in pairs(Players) do
-            if player:FindFirstChild("Highlight") ~= nil then
-                player:FindFirstChild("Highlight"):Destroy()
+            if player:FindFirstChild("Highlight") then
+                player.Highlight:Destroy()
             end
         end
     end
@@ -99,8 +89,10 @@ function checkPlayersLife()
         local Players = workspace.Players:GetChildren()
         for i, player in pairs(Players) do
             local humanoid = player:FindFirstChild("Humanoid")
-            if humanoid and humanoid.Health < 60 and player.Name ~= LocalPlayer.Name and (LocalPlayer.Backpack:FindFirstChild("Medical Supplies") or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Medical Supplies") and LocalPlayer.Character["Medical Supplies"]:IsA("Tool"))) then
-                if player:FindFirstChild("Highlight") == nil then
+            if humanoid and humanoid.Health < 60 and player.Name ~= LocalPlayer.Name and 
+               (LocalPlayer.Backpack:FindFirstChild("Medical Supplies") or 
+               (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Medical Supplies"))) then
+                if not player:FindFirstChild("Highlight") then
                     local Highlight = Instance.new("Highlight")
                     Highlight.Parent = player
                     Highlight.Adornee = player
@@ -110,38 +102,34 @@ function checkPlayersLife()
                     Highlight.OutlineTransparency = 0.2
                 end
             else
-                if player:FindFirstChild("Highlight") ~= nil then
-                    player:FindFirstChild("Highlight"):Destroy()
+                if player:FindFirstChild("Highlight") then
+                    player.Highlight:Destroy()
                 end
             end
 
-            if LocalPlayer.Backpack:FindFirstChild("Mercy") or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Mercy") and LocalPlayer.Character["Mercy"]:IsA("Tool")) then
+            if LocalPlayer.Backpack:FindFirstChild("Mercy") or 
+               (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Mercy")) then
                 local userStates = player:FindFirstChild("UserStates")
                 if userStates and userStates:FindFirstChild("Infected") then
-                    if userStates.Infected.Value > 10 and player:FindFirstChild("Highlight") == nil then
+                    if userStates.Infected.Value > 10 then
                         if userStates.Infected.Value > 89 then
-                            if player:FindFirstChild("Highlight") ~= nil then
-                                local Highlight = player:FindFirstChild("Highlight")
-                                Highlight.FillColor = Color3.fromRGB(178,34,34)
-                            else
+                            local Highlight = player:FindFirstChild("Highlight") or Instance.new("Highlight")
+                            Highlight.Parent = player
+                            Highlight.Adornee = player
+                            Highlight.FillColor = Color3.fromRGB(178,34,34)
+                        else
+                            if not player:FindFirstChild("Highlight") then
                                 local Highlight = Instance.new("Highlight")
                                 Highlight.Parent = player
                                 Highlight.Adornee = player
-                                Highlight.FillColor = Color3.fromRGB(178,34,34)
+                                Highlight.FillColor = Color3.fromRGB(255, 169, 108)
+                                Highlight.FillTransparency = 0.8
+                                Highlight.OutlineColor = Color3.fromRGB(255, 206, 108)
+                                Highlight.OutlineTransparency = 0.2
                             end
-                        else
-                            local Highlight = Instance.new("Highlight")
-                            Highlight.Parent = player
-                            Highlight.Adornee = player
-                            Highlight.FillColor = Color3.fromRGB(255, 169, 108)
-                            Highlight.FillTransparency = 0.8
-                            Highlight.OutlineColor = Color3.fromRGB(255, 206, 108)
-                            Highlight.OutlineTransparency = 0.2
                         end
-                    else 
-                        if player:FindFirstChild("Highlight") ~= nil and userStates.Infected.Value == 0 then
-                            player:FindFirstChild("Highlight"):Destroy()
-                        end
+                    elseif player:FindFirstChild("Highlight") and userStates.Infected.Value == 0 then
+                        player.Highlight:Destroy()
                     end
                 end
             end
@@ -152,36 +140,47 @@ end
 
 toolEquip = true
 
--- Enhanced Kill Aura & Shove Aura
+-- OPTIMIZED Kill Aura & Shove Aura (FIXED)
 observerOnline = false
 killAuraToggled = false
+killBomberToggled = false
 shoveAuraToggled = false
 isDead = false
 killAuraConnection = nil
 
 shoveRadius = 8
 maxShovePerCycle = 10
-local shoveThrottleTime = 0.2
 local stunCooldowns = {}
 local lastShoveTime = 0
-
 local killAuraRadius = 13
+local killAuraMaxAttacksPerFrame = 10
+local killAuraHitsPerZombie = 2
+local lastAttackTime = 0
+local attackThrottle = 0.01
+
+local zombiesFolder = workspace:WaitForChild("Zombies")
 
 local raycastParams = RaycastParams.new()
-raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
 raycastParams.FilterType = Enum.RaycastFilterType.Exclude
 
 local params = OverlapParams.new()
-params.FilterDescendantsInstances = {LocalPlayer.Character}
+params.FilterType = Enum.RaycastFilterType.Include
+params.FilterDescendantsInstances = {zombiesFolder}
+
+local function updateFilters()
+    if LocalPlayer.Character then
+        raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
+    end
+end
+
+updateFilters()
 
 function getEquippedWeapon()
     if not LocalPlayer.Character then return nil end
     
     for _, child in pairs(LocalPlayer.Character:GetChildren()) do
-        if child:IsA("Tool") then
-            if child:FindFirstChild("RemoteEvent") or child:FindFirstChild("Remote") then
-                return child
-            end
+        if child:IsA("Tool") and (child:FindFirstChild("RemoteEvent") or child:FindFirstChild("Remote")) then
+            return child
         end
     end
     
@@ -191,12 +190,7 @@ end
 function canWeaponShove(weapon)
     if not weapon then return false end
     
-    local shoveWeapons = {
-        "Pickaxe", 
-        "Axe",
-        "Carbine",
-        "Navy Pistol"
-    }
+    local shoveWeapons = {"Pickaxe", "Axe", "Carbine", "Navy Pistol"}
     
     for _, shoveWeapon in pairs(shoveWeapons) do
         if weapon.Name:lower():find(shoveWeapon:lower()) then
@@ -204,20 +198,14 @@ function canWeaponShove(weapon)
         end
     end
     
-    if weapon:GetAttribute("CanShove") == true then
-        return true
-    end
-    
-    return false
+    return weapon:GetAttribute("CanShove") == true
 end
 
 function shoveAttack(weapon, hit, hitPart)
     if not weapon or not hit then return end
     
     local currentTime = tick()
-    local zombieId = tostring(hit)
-    
-    stunCooldowns[zombieId] = currentTime
+    stunCooldowns[tostring(hit)] = currentTime
     
     local remoteEvent = weapon:FindFirstChild("RemoteEvent") or weapon:FindFirstChild("Remote")
     if not remoteEvent then return end
@@ -226,56 +214,28 @@ function shoveAttack(weapon, hit, hitPart)
         pcall(function()
             remoteEvent:FireServer("FeedbackStun", hit, hitPart.Position)
             
-            if weapon.Name:lower():find("axe") then
+            local wName = weapon.Name:lower()
+            if wName:find("axe") then
                 remoteEvent:FireServer("BraceBlock")
                 remoteEvent:FireServer("StopBraceBlock")
                 remoteEvent:FireServer("FeedbackStunObject", hit, hitPart.Position)
-            end
-            
-            if weapon.Name:lower():find("pickaxe") then
+            elseif wName:find("pickaxe") then
                 remoteEvent:FireServer("Swing", "Shove")
                 remoteEvent:FireServer("FeedbackStun", hit, hitPart.Position)
-            end
-            
-            if weapon.Name:lower():find("carbine") then
-                remoteEvent:FireServer("Shove")
-                remoteEvent:FireServer("FeedbackStun", hit, hitPart.Position)
-            end
-            
-            if weapon.Name:lower():find("navy pistol") then
+            elseif wName:find("carbine") or wName:find("navy pistol") then
                 remoteEvent:FireServer("Shove")
             end
         end)
     end)
 end
 
-function attackWithWeapon(weapon, hit, hitPart, calc, normal)
-    if not weapon then return end
-    
-    local remoteEvent = weapon:FindFirstChild("RemoteEvent") or weapon:FindFirstChild("Remote")
-    if not remoteEvent then return end
-    
-    local success = false
-    
-    pcall(function()
-        remoteEvent:FireServer("Swing", "Thrust")
-        remoteEvent:FireServer("HitZombie", hit, hitPart.CFrame.Position, true, calc * 25, "Head", normal)
-        success = true
-    end)
-    
-    if not success then
-        pcall(function()
-            remoteEvent:FireServer("Bayonet_HitZombie", hit, hitPart.CFrame.Position, true, "Head")
-            success = true
-        end)
-    end
-    
-    if not success then
-        pcall(function()
-            remoteEvent:FireServer("HitZombie", hit, hitPart.CFrame.Position, true, calc * 25, "Head", normal)
-        end)
-    end
-end
+local zombiePositionCache = {}
+local zombieVelocityCache = {}
+local playerPositionCache = nil
+local playerVelocityCache = Vector3.zero
+local lastCleanupTime = 0
+local lastHealthCheckTime = 0
+local consecutiveErrors = 0
 
 function detectEnemy(hitbox, hrp)
     if killAuraConnection then
@@ -286,6 +246,7 @@ function detectEnemy(hitbox, hrp)
         if not killAuraToggled and not shoveAuraToggled then
             isDead = false
             observerOnline = false
+            consecutiveErrors = 0
             if killAuraConnection then
                 killAuraConnection:Disconnect()
                 killAuraConnection = nil
@@ -293,120 +254,241 @@ function detectEnemy(hitbox, hrp)
             return
         end
 
-        if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        if not LocalPlayer.Character or not hitbox or not hitbox.Parent or not hrp or not hrp.Parent then
+            consecutiveErrors = consecutiveErrors + 1
+            if consecutiveErrors > 150 then
+                consecutiveErrors = 0
+                observerOnline = false
+                if killAuraToggled or shoveAuraToggled then
+                    task.delay(0.02, function()
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            createHitBox()
+                        end
+                    end)
+                end
+            end
             return
         end
-
-        if not hitbox or not hitbox.Parent then
-            return
-        end
-
+        
+        consecutiveErrors = 0
         local currentTime = tick()
         
-        if currentTime - lastShoveTime < 0.05 then
-            return
+        if currentTime - lastHealthCheckTime > 2 then
+            if killAuraToggled or shoveAuraToggled then
+                if not hitbox or not hitbox.Parent then
+                    observerOnline = false
+                    createHitBox()
+                    return
+                end
+            end
+            lastHealthCheckTime = currentTime
         end
-
-        local success, parts = pcall(function()
-            return workspace:GetPartsInPart(hitbox, params)
-        end)
-
-        if not success then
-            return
+        
+        if killAuraToggled and currentTime - lastCleanupTime > 3 then
+            pcall(function()
+                local activeZombies = {}
+                for _, z in pairs(zombiesFolder:GetChildren()) do
+                    activeZombies[tostring(z)] = true
+                end
+                
+                for zombieId in pairs(zombiePositionCache) do
+                    if not activeZombies[zombieId] then
+                        zombiePositionCache[zombieId] = nil
+                        zombieVelocityCache[zombieId] = nil
+                    end
+                end
+            end)
+            lastCleanupTime = currentTime
         end
+        
+        if currentTime - lastShoveTime < 0.05 then return end
 
         local zombiesToShove = {}
         local zombiesToAttack = {}
         local equippedWeapon = getEquippedWeapon()
+        
+        if killAuraToggled and not equippedWeapon then 
+            return 
+        end
+        
+        local playerCFrame = hrp.CFrame
+        local playerPos = playerCFrame.Position
+        
+        if killAuraToggled then
+            if playerPositionCache then
+                playerVelocityCache = (playerPos - playerPositionCache) / 0.03
+            end
+            playerPositionCache = playerPos
+        end
 
-        for i, part in pairs(parts) do
-            if part.Parent and part.Parent.Name == "m_Zombie" then
-                pcall(function()
-                    local Origin = part.Parent:FindFirstChild("Orig")
-                    if Origin and Origin.Value then
-                        local zombie = Origin.Value:FindFirstChild("Zombie")
-                        if not zombie then return end
-                        
-                        local hit = Origin.Value
-                        if not hit or not hit:FindFirstChild("Head") or not hit:FindFirstChild("HumanoidRootPart") then
-                            return
-                        end
+        local success = pcall(function()
+            if not zombiesFolder then return end
 
-                        local distance = LocalPlayer:DistanceFromCharacter(hit.HumanoidRootPart.CFrame.Position)
-                        
-                        if shoveAuraToggled and equippedWeapon and canWeaponShove(equippedWeapon) and distance <= shoveRadius then
-                            local zombieId = tostring(hit)
-                            if not stunCooldowns[zombieId] or currentTime - stunCooldowns[zombieId] >= 1.0 then
-                                local raycastResult = workspace:Raycast(hrp.CFrame.Position, hit.Head.CFrame.Position - hrp.CFrame.Position, raycastParams)
-                                if raycastResult then
-                                    table.insert(zombiesToShove, {
-                                        hit = hit, 
-                                        part = part, 
-                                        zombie = zombie, 
-                                        raycast = raycastResult,
-                                        priority = zombie.WalkSpeed > 16 and 1 or 2
-                                    })
-                                end
-                            end
-                        end
-                        
-                        if killAuraToggled and distance <= killAuraRadius then
-                            local zombieId = tostring(hit)
-                            local willBeShoved = false
-                            
-                            if shoveAuraToggled and equippedWeapon and canWeaponShove(equippedWeapon) and distance <= shoveRadius then
-                                if not stunCooldowns[zombieId] or currentTime - stunCooldowns[zombieId] >= 1.0 then
-                                    willBeShoved = true
-                                end
-                            end
-                            
-                            if not willBeShoved then
-                                local raycastResult = workspace:Raycast(hrp.CFrame.Position, hit.Head.CFrame.Position - hrp.CFrame.Position, raycastParams)
-                                if raycastResult then
-                                    local calc = (raycastResult.Position - hrp.CFrame.Position)
-                                    if calc:Dot(calc) > 1 then
-                                        calc = calc.Unit
-                                    end
-                                    
-                                    table.insert(zombiesToAttack, {
-                                        hit = hit,
-                                        part = part,
-                                        zombie = zombie,
-                                        raycast = raycastResult,
-                                        calc = calc
-                                    })
-                                end
-                            end
+            local parts = workspace:GetPartsInPart(hitbox, params)
+            local processedZombies = {}
+            local maxZombiesPerFrame = 20
+
+            for i, part in ipairs(parts) do
+                if i > maxZombiesPerFrame then break end
+                local serverZombie = part.Parent
+                if not serverZombie or not serverZombie.Parent then continue end
+                
+                local zombieId = tostring(serverZombie)
+                if processedZombies[zombieId] then continue end
+                processedZombies[zombieId] = true
+                
+                local zombie = serverZombie:FindFirstChild("Zombie")
+                if not zombie then continue end
+                
+                local head = serverZombie:FindFirstChild("Head")
+                local zombieHRP = serverZombie:FindFirstChild("HumanoidRootPart")
+                
+                if not head or not zombieHRP then continue end
+
+                local zombieCFrame = zombieHRP.CFrame
+                local zombiePos = zombieCFrame.Position
+                
+                local zombieVelocity = Vector3.zero
+                if killAuraToggled then
+                    local lastPos = zombiePositionCache[zombieId]
+                    
+                    if lastPos then
+                        zombieVelocity = (zombiePos - lastPos) / 0.03
+                        zombieVelocityCache[zombieId] = zombieVelocity
+                    else
+                        zombieVelocity = zombieVelocityCache[zombieId] or Vector3.zero
+                    end
+                    
+                    zombiePositionCache[zombieId] = zombiePos
+                end
+                
+                local predictedPlayerPos = playerPos
+                local predictedZombiePos = zombiePos
+                
+                if killAuraToggled then
+                    local pingCompensation = 0.15
+                    predictedPlayerPos = playerPos + (playerVelocityCache * pingCompensation)
+                    predictedZombiePos = zombiePos + (zombieVelocity * pingCompensation)
+                end
+                
+                local toZombie = predictedZombiePos - predictedPlayerPos
+                local distance = toZombie.Magnitude
+                
+                local maxRadius = math.max(shoveRadius, killAuraRadius) + 5
+                if distance > maxRadius then continue end
+                
+                if shoveAuraToggled and equippedWeapon and canWeaponShove(equippedWeapon) and distance <= shoveRadius then
+                    if not stunCooldowns[zombieId] or currentTime - stunCooldowns[zombieId] >= 1.0 then
+                        table.insert(zombiesToShove, {
+                            hit = serverZombie, 
+                            head = head,
+                            zombie = zombie, 
+                            priority = zombie.WalkSpeed > 16 and 1 or 2,
+                            distance = distance,
+                            serverPos = zombiePos
+                        })
+                    end
+                end
+                
+                if killAuraToggled and distance <= killAuraRadius then
+                    local willBeShoved = false
+                    
+                    if shoveAuraToggled and equippedWeapon and canWeaponShove(equippedWeapon) and distance <= shoveRadius then
+                        if not stunCooldowns[zombieId] or currentTime - stunCooldowns[zombieId] >= 1.0 then
+                            willBeShoved = true
                         end
                     end
-                end)
+                    
+                    if not willBeShoved then
+                        local calc = toZombie
+                        if calc:Dot(calc) > 1 then
+                            calc = calc.Unit
+                        end
+                        
+                        -- FIXED: Bomber detection without WalkSpeed check to match ESP
+                        local isBomber = serverZombie:FindFirstChild("Barrel") ~= nil
+                        
+                        table.insert(zombiesToAttack, {
+                            hit = serverZombie,
+                            head = head,
+                            zombie = zombie,
+                            calc = calc,
+                            serverPos = predictedZombiePos,
+                            distance = distance,
+                            rawDistance = (zombiePos - playerPos).Magnitude,
+                            isBomber = isBomber
+                        })
+                    end
+                end
             end
+        end)
+        
+        if not success then
+            consecutiveErrors = consecutiveErrors + 1
+            if consecutiveErrors > 300 then
+                consecutiveErrors = 0
+                observerOnline = false
+                if killAuraToggled or shoveAuraToggled then
+                    task.delay(0.02, function()
+                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            createHitBox()
+                        end
+                    end)
+                end
+            end
+            return
         end
 
         if #zombiesToShove > 0 and equippedWeapon and canWeaponShove(equippedWeapon) and toolEquip then
-            table.sort(zombiesToShove, function(a, b) return a.priority < b.priority end)
+            table.sort(zombiesToShove, function(a, b) 
+                if a.priority ~= b.priority then
+                    return a.priority < b.priority
+                end
+                return a.distance < b.distance
+            end)
             
             local shoveCount = math.min(#zombiesToShove, maxShovePerCycle)
-            
             for i = 1, shoveCount do
-                local zombieData = zombiesToShove[i]
-                shoveAttack(equippedWeapon, zombieData.hit, zombieData.hit.Head)
+                local z = zombiesToShove[i]
+                pcall(function()
+                    shoveAttack(equippedWeapon, z.hit, z.head)
+                end)
             end
             
             lastShoveTime = currentTime
             return
         end
         
-        if #zombiesToAttack > 0 and equippedWeapon and toolEquip then
-            for _, zombieData in pairs(zombiesToAttack) do
-                if zombieData.zombie.WalkSpeed > 16 then
-                    attackWithWeapon(equippedWeapon, zombieData.hit, zombieData.hit.Head, zombieData.calc, zombieData.raycast.Normal)
-                else
-                    if not zombieData.part.Parent:FindFirstChild("Barrel") then
-                        attackWithWeapon(equippedWeapon, zombieData.hit, zombieData.hit.Head, zombieData.calc, zombieData.raycast.Normal)
+        if killAuraToggled and #zombiesToAttack > 0 and equippedWeapon and toolEquip and (currentTime - lastAttackTime > attackThrottle) then
+            table.sort(zombiesToAttack, function(a, b) return a.rawDistance < b.rawDistance end)
+            
+            local attackCount = 0
+            
+            for _, zData in pairs(zombiesToAttack) do
+                if attackCount >= killAuraMaxAttacksPerFrame then break end
+                
+                -- FIXED: Skip bombers if not toggled
+                if zData.isBomber and not killBomberToggled then
+                    continue
+                end
+                
+                for hitAttempt = 1, killAuraHitsPerZombie do
+                    if attackCount >= killAuraMaxAttacksPerFrame then break end
+                    
+                    local remoteEvent = equippedWeapon:FindFirstChild("RemoteEvent") or equippedWeapon:FindFirstChild("Remote")
+                    if remoteEvent then
+                        local attackSuccess = pcall(function()
+                            remoteEvent:FireServer("Swing", "Thrust")
+                            remoteEvent:FireServer("HitZombie", zData.hit, zData.serverPos, true, zData.calc * 25, "Head", Vector3.new(0,1,0))
+                        end)
+                        
+                        if attackSuccess then
+                            attackCount = attackCount + 1
+                        end
                     end
                 end
             end
+            lastAttackTime = currentTime
         end
     end)
 end
@@ -433,6 +515,10 @@ end
 
 function setMaxShovePerCycle(newMax)
     maxShovePerCycle = newMax
+end
+
+function setKillAuraMaxAttacksPerFrame(newMax)
+    killAuraMaxAttacksPerFrame = newMax
 end
 
 function createHitBox()
@@ -493,13 +579,23 @@ function createHitBox()
 end
 
 function onLights()
-    local ligthPost = game:GetService("Workspace"):waitForChild("Saint Petersburg").Modes.Holdout:waitForChild("LampPosts"):GetChildren()
-
-    for i, part in pairs(ligthPost) do
-        if part:FindFirstChild("Metal") ~= nil then
-            local Metal = part:FindFirstChild("Metal")
-            Metal.Light.PointLight.Enabled = true
-            Metal.Light.Visible = true
+    local ligthPost = workspace:FindFirstChild("Saint Petersburg")
+    if not ligthPost then return end
+    
+    local modes = ligthPost:FindFirstChild("Modes")
+    if not modes then return end
+    
+    local holdout = modes:FindFirstChild("Holdout")
+    if not holdout then return end
+    
+    local lampPosts = holdout:FindFirstChild("LampPosts")
+    if not lampPosts then return end
+    
+    for _, part in pairs(lampPosts:GetChildren()) do
+        local metal = part:FindFirstChild("Metal")
+        if metal and metal:FindFirstChild("Light") then
+            metal.Light.PointLight.Enabled = true
+            metal.Light.Visible = true
         end
     end
 end
@@ -511,11 +607,12 @@ local function changeWalkSpeed(newValue, walkSpeedToggled)
     if workPlayer and workPlayer:FindFirstChild("Humanoid") then
         workPlayer.Humanoid.WalkSpeed = newValue
         if walkSpeedToggled then
+            if connection then connection:Disconnect() end
             connection = workPlayer.Humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function() 
                 workPlayer.Humanoid.WalkSpeed = newValue 
             end)
         else
-            if connection ~= nil then
+            if connection then
                 connection:Disconnect()
                 connection = nil
             end
@@ -525,11 +622,10 @@ end
 
 walkSpeedToggled = false
 walkSpeedValue = 16
-workspace.Players.ChildAdded:Connect(
-   function(child)
+
+workspace.Players.ChildAdded:Connect(function(child)
     changeWalkSpeed(walkSpeedValue, walkSpeedToggled)
-   end
-)
+end)
 
 local namecall
 autoplay = false
@@ -539,79 +635,49 @@ namecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod():lower()
 
     if not checkcaller() and self.Name == "RemoteEvent" and method == "fireserver" then
-        if autoplay then
-            if args[1] ~= nil then
-                if args[1] == "UpdateAccuracy" then
-                    args[2] = 100
-                    return namecall(self, unpack(args))
-                end
-            end
+        if autoplay and args[1] == "UpdateAccuracy" then
+            args[2] = 100
+            return namecall(self, unpack(args))
         end
-        return namecall(self, unpack(args))
     end
     return namecall(self, ...)
 end)
 
--- Bayonet Head Lock
-local FlintLock = require(game:GetService("ReplicatedStorage").Modules.Weapons:waitForChild("Flintlock"))
-local originFunction_ = FlintLock.BayonetHitCheck
+-- Bayonet & Melee Head Lock
+local FlintLock = require(game:GetService("ReplicatedStorage").Modules.Weapons:FindFirstChild("Flintlock"))
+local MeleeBase = require(game:GetService("ReplicatedStorage").Modules.Weapons:FindFirstChild("MeleeBase"))
 
-local v_u_1 = {}
-function v_u_1.BayonetHitCheck(p115, p116, p117, p118, p119)
+local originBayonet = FlintLock.BayonetHitCheck
+local originMelee = MeleeBase.MeleeHitCheck
+
+local customBayonet = {}
+function customBayonet.BayonetHitCheck(p115, p116, p117, p118, p119)
     local v120 = workspace:Raycast(p116, p117, p118)
-    if v120 then
-        if v120.Instance.Parent.Name == "m_Zombie" then
-            local v121 = p118.FilterDescendantsInstances
-            local v122 = v120.Instance
-            table.insert(v121, v122)
-            p118.FilterDescendantsInstances = v121
-            local v123 = v120.Instance.Parent:FindFirstChild("Orig")
-            if v123 then
-                local Head = ""
-                for i, part in pairs(v120.Instance.Parent:GetChildren()) do
-                    if part.Name == "Head" and (part.ClassName == "Part" or part.ClassName == "MeshPart") then
-                        Head = part
-                    end
-                end
+    if v120 and v120.Instance.Parent.Name == "m_Zombie" then
+        
+        local v123 = v120.Instance.Parent:FindFirstChild("Orig")
+        if v123 then
+            local Head = v120.Instance.Parent:FindFirstChild("Head")
+            if Head then
                 p115.remoteEvent:FireServer("Bayonet_HitZombie", v123.Value, Head.CFrame.Position, true, "Head")
             end
-            return 2
         end
+        return 2
     end
     return 0
 end
 
-function changeBayonet(value)
-   if value then
-      FlintLock.BayonetHitCheck = v_u_1.BayonetHitCheck
-   else
-      FlintLock.BayonetHitCheck = originFunction_
-   end
-end
-
--- Melee Head Lock
-local MeleeBase = require(game:GetService("ReplicatedStorage").Modules.Weapons:waitForChild("MeleeBase"))
-local originFunction = MeleeBase.MeleeHitCheck
-
-local u1 = {}
-function u1.MeleeHitCheck(p100, p101, p102, p103, p104, p105)
+local customMelee = {}
+function customMelee.MeleeHitCheck(p100, p101, p102, p103, p104, p105)
     local v106 = workspace:Raycast(p101, p102, p103)
-    if v106 then
-        if v106.Instance.Parent.Name == "m_Zombie" then
-            local v107 = p103.FilterDescendantsInstances
-            local v108 = v106.Instance
-            table.insert(v107, v108)
-            p103.FilterDescendantsInstances = v107
-            local v109 = v106.Instance.Parent:FindFirstChild("Orig")
-            if v109 then
-                if not p104[v109] or p104[v109] < (p100.Stats.MaxHits or 3) then
-                    if not p105 then
-                        local Head = ""
-                        for i, part in pairs(v106.Instance.Parent:GetChildren()) do
-                            if part.Name == "Head" and (part.ClassName == "Part" or part.ClassName == "MeshPart") then
-                                Head = part
-                            end
-                        end
+    if v106 and v106.Instance.Parent.Name == "m_Zombie" then
+        
+        local v109 = v106.Instance.Parent:FindFirstChild("Orig")
+        if v109 then
+            if not p104[v109] or p104[v109] < (p100.Stats.MaxHits or 3) then
+                if not p105 then
+                    local Head = v106.Instance.Parent:FindFirstChild("Head")
+                    if Head then
                         local u112 = v109.Value
                         local v113 = Head.CFrame.Position - p101
                         if v113:Dot(v113) > 1 then
@@ -620,219 +686,155 @@ function u1.MeleeHitCheck(p100, p101, p102, p103, p104, p105)
                         local v114 = v113 * 25
                         p100.remoteEvent:FireServer("HitZombie", u112, Head.CFrame.Position, true, v114, "Head", v106.Normal)
                     end
-                    if p104[v109] then
-                        p104[v109] = p104[v109] + 1
-                    else
-                        table.insert(p104, v109)
-                        p104[v109] = 1
-                    end
+                end
+                
+                if p104[v109] then
+                    p104[v109] = p104[v109] + 1
+                else
+                    table.insert(p104, v109)
+                    p104[v109] = 1
                 end
             end
-            return 1
         end
+        return 1
     end
     return 0
 end
 
-function changeMelee(value)
-   if value then
-      MeleeBase.MeleeHitCheck = u1.MeleeHitCheck
-   else
-      MeleeBase.MeleeHitCheck = originFunction
-   end
+function changeBayonet(value)
+    FlintLock.BayonetHitCheck = value and customBayonet.BayonetHitCheck or originBayonet
 end
 
--- OPTIMIZED Zombie Hitbox Expander
+function changeMelee(value)
+    MeleeBase.MeleeHitCheck = value and customMelee.MeleeHitCheck or originMelee
+end
+
+-- Working Zombie Hitbox Expander (Fixed)
 local hitboxEnabled = false
 local hitboxSize = 10
 local zombieFolder = workspace:WaitForChild("Zombies")
-local zombieFolderConnection = nil
-local cameraConnection = nil
-local hitboxUpdateLoop = nil
-local trackedZombies = {}
 
-local function expandHitbox(zombie)
-    if not hitboxEnabled then return end
+local function addOuterHitbox(zombie)
     if not zombie or not zombie.Parent then return end
-    
     local hrp = zombie:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    
-    local zombieId = tostring(zombie)
-    local existingHitbox = hrp:FindFirstChild("HitboxPart")
-    local newSize = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
-    
-    if existingHitbox then
-        if trackedZombies[zombieId] and trackedZombies[zombieId].size == hitboxSize then
-            return
-        end
-        existingHitbox.Size = newSize
-        trackedZombies[zombieId] = {size = hitboxSize, hitbox = existingHitbox}
-    else
-        local hitbox = Instance.new("Part")
-        hitbox.Name = "HitboxPart"
-        hitbox.Size = newSize
-        hitbox.Transparency = 1
-        hitbox.CanCollide = false
-        hitbox.Massless = true
-        hitbox.Anchored = false
-        hitbox.CFrame = hrp.CFrame
-        hitbox.Parent = hrp
-        
-        local weld = Instance.new("WeldConstraint")
-        weld.Part0 = hrp
-        weld.Part1 = hitbox
-        weld.Parent = hitbox
-        
-        trackedZombies[zombieId] = {size = hitboxSize, hitbox = hitbox}
+    if hrp and not zombie:FindFirstChild("OuterHitbox") then
+        pcall(function()
+            local part = Instance.new("Part")
+            part.Name = "OuterHitbox"
+            part.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
+            part.Transparency = 1
+            part.Anchored = false
+            part.CanCollide = false
+            part.Massless = true
+            part.CanTouch = true
+            part.CFrame = hrp.CFrame
+            part.Parent = zombie
+
+            local weld = Instance.new("WeldConstraint")
+            weld.Part0 = hrp
+            weld.Part1 = part
+            weld.Parent = part
+        end)
     end
 end
 
-local function removeZombieHitbox(zombie)
+local function addHeadHitbox(zombie)
+    if not zombie or not zombie.Parent then return end
+    local head = zombie:FindFirstChild("Head")
+    if head and not zombie:FindFirstChild("HeadHitbox") then
+        pcall(function()
+            local part = Instance.new("Part")
+            part.Name = "HeadHitbox"
+            part.Size = Vector3.new(hitboxSize/2, hitboxSize/2, hitboxSize/2)
+            part.Transparency = 1
+            part.Anchored = false
+            part.CanCollide = false
+            part.Massless = true
+            part.CanTouch = true
+            part.CFrame = head.CFrame
+            part.Parent = zombie
+
+            local weld = Instance.new("WeldConstraint")
+            weld.Part0 = head
+            weld.Part1 = part
+            weld.Parent = part
+        end)
+    end
+end
+
+local function removeHitboxes(zombie)
     if not zombie then return end
-    local zombieId = tostring(zombie)
-    
-    if trackedZombies[zombieId] then
-        if trackedZombies[zombieId].hitbox and trackedZombies[zombieId].hitbox.Parent then
-            trackedZombies[zombieId].hitbox:Destroy()
-        end
-        trackedZombies[zombieId] = nil
-    end
-    
-    local hrp = zombie:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        local hitbox = hrp:FindFirstChild("HitboxPart")
-        if hitbox then
-            hitbox:Destroy()
-        end
-    end
+    pcall(function()
+        local outer = zombie:FindFirstChild("OuterHitbox")
+        local head = zombie:FindFirstChild("HeadHitbox")
+        if outer then outer:Destroy() end
+        if head then head:Destroy() end
+    end)
 end
 
-local function removeAllHitboxes()
-    for zombieId, data in pairs(trackedZombies) do
-        if data.hitbox and data.hitbox.Parent then
-            data.hitbox:Destroy()
-        end
-    end
-    trackedZombies = {}
-    
-    for _, zombie in pairs(zombieFolder:GetChildren()) do
-        removeZombieHitbox(zombie)
-    end
-    
-    for _, zombie in pairs(workspace.Camera:GetChildren()) do
-        if zombie.Name == "m_Zombie" then
-            removeZombieHitbox(zombie)
-        end
+local function updateHitboxes(zombie)
+    if not zombie then return end
+    if hitboxEnabled then
+        removeHitboxes(zombie)
+        task.wait(0.05)
+        addOuterHitbox(zombie)
+        addHeadHitbox(zombie)
+    else
+        removeHitboxes(zombie)
     end
 end
 
 local function setHitboxSize(newSize)
     hitboxSize = newSize
     if hitboxEnabled then
-        trackedZombies = {}
-        
-        for _, zombie in pairs(zombieFolder:GetChildren()) do
-            expandHitbox(zombie)
-        end
-        
-        for _, zombie in pairs(workspace.Camera:GetChildren()) do
-            if zombie.Name == "m_Zombie" then
-                expandHitbox(zombie)
+        pcall(function()
+            for _, zombie in pairs(zombieFolder:GetChildren()) do
+                updateHitboxes(zombie)
             end
-        end
+            for _, zombie in pairs(workspace.Camera:GetChildren()) do
+                if zombie.Name == "m_Zombie" then
+                    updateHitboxes(zombie)
+                end
+            end
+        end)
     end
 end
 
 local function toggleHitboxExpander(enabled)
     hitboxEnabled = enabled
     
-    if zombieFolderConnection then
-        zombieFolderConnection:Disconnect()
-        zombieFolderConnection = nil
-    end
-    
-    if cameraConnection then
-        cameraConnection:Disconnect()
-        cameraConnection = nil
-    end
-    
-    if hitboxUpdateLoop then
-        hitboxUpdateLoop:Disconnect()
-        hitboxUpdateLoop = nil
-    end
-    
-    if enabled then
+    pcall(function()
         for _, zombie in pairs(zombieFolder:GetChildren()) do
-            expandHitbox(zombie)
+            updateHitboxes(zombie)
         end
-        
         for _, zombie in pairs(workspace.Camera:GetChildren()) do
             if zombie.Name == "m_Zombie" then
-                expandHitbox(zombie)
+                updateHitboxes(zombie)
             end
         end
-        
-        zombieFolderConnection = zombieFolder.ChildAdded:Connect(function(zombie)
-            task.wait(0.1)
-            expandHitbox(zombie)
-        end)
-        
-        zombieFolder.ChildRemoved:Connect(function(zombie)
-            removeZombieHitbox(zombie)
-        end)
-        
-        cameraConnection = workspace.Camera.ChildAdded:Connect(function(zombie)
-            if zombie.Name == "m_Zombie" then
-                task.wait(0.1)
-                expandHitbox(zombie)
-            end
-        end)
-        
-        workspace.Camera.ChildRemoved:Connect(function(zombie)
-            if zombie.Name == "m_Zombie" then
-                removeZombieHitbox(zombie)
-            end
-        end)
-        
-        local lastUpdate = 0
-        hitboxUpdateLoop = RunService.Heartbeat:Connect(function()
-            if not hitboxEnabled then
-                if hitboxUpdateLoop then
-                    hitboxUpdateLoop:Disconnect()
-                    hitboxUpdateLoop = nil
-                end
-                return
-            end
-            
-            local currentTime = tick()
-            if currentTime - lastUpdate < 2 then
-                return
-            end
-            lastUpdate = currentTime
-            
-            for _, zombie in pairs(zombieFolder:GetChildren()) do
-                if zombie and zombie.Parent then
-                    expandHitbox(zombie)
-                end
-            end
-            
-            for _, zombie in pairs(workspace.Camera:GetChildren()) do
-                if zombie.Name == "m_Zombie" and zombie.Parent then
-                    expandHitbox(zombie)
-                end
-            end
-        end)
-    else
-        removeAllHitboxes()
-    end
+    end)
 end
 
--- Fullbright System
+-- Auto-apply to new zombies
+zombieFolder.ChildAdded:Connect(function(zombie)
+    if hitboxEnabled then
+        task.wait(0.2)
+        updateHitboxes(zombie)
+    end
+end)
+
+workspace.Camera.ChildAdded:Connect(function(zombie)
+    if zombie.Name == "m_Zombie" and hitboxEnabled then
+        task.wait(0.2)
+        updateHitboxes(zombie)
+    end
+end)
+
+-- Fullbright
 local Light = game:GetService("Lighting")
 local fullbrightEnabled = false
 local fullbrightConnection = nil
-local originalLightingSettings = {
+local originalLighting = {
     Ambient = Light.Ambient,
     ColorShift_Bottom = Light.ColorShift_Bottom,
     ColorShift_Top = Light.ColorShift_Top,
@@ -842,7 +844,6 @@ local originalLightingSettings = {
 
 local function doFullbright()
     if not fullbrightEnabled then return end
-    
     Light.Ambient = Color3.new(1, 1, 1)
     Light.ColorShift_Bottom = Color3.new(1, 1, 1)
     Light.ColorShift_Top = Color3.new(1, 1, 1)
@@ -851,16 +852,15 @@ local function doFullbright()
 end
 
 local function restoreLighting()
-    Light.Ambient = originalLightingSettings.Ambient
-    Light.ColorShift_Bottom = originalLightingSettings.ColorShift_Bottom
-    Light.ColorShift_Top = originalLightingSettings.ColorShift_Top
-    Light.OutdoorAmbient = originalLightingSettings.OutdoorAmbient
-    Light.Brightness = originalLightingSettings.Brightness
+    Light.Ambient = originalLighting.Ambient
+    Light.ColorShift_Bottom = originalLighting.ColorShift_Bottom
+    Light.ColorShift_Top = originalLighting.ColorShift_Top
+    Light.OutdoorAmbient = originalLighting.OutdoorAmbient
+    Light.Brightness = originalLighting.Brightness
 end
 
 local function toggleFullbright(enabled)
     fullbrightEnabled = enabled
-    
     if fullbrightConnection then
         fullbrightConnection:Disconnect()
         fullbrightConnection = nil
@@ -880,7 +880,6 @@ local killbrickConnection = nil
 
 local function toggleKillbrick(enabled)
     killbrickEnabled = enabled
-    
     if killbrickConnection then
         killbrickConnection:Disconnect()
         killbrickConnection = nil
@@ -888,108 +887,78 @@ local function toggleKillbrick(enabled)
     
     if not enabled then
         killbrickConnection = RunService.Heartbeat:Connect(function()
-            if not LocalPlayer.Character then return end
-            local humanoidRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not humanoidRootPart then return end
-            
-            local parts = workspace:GetPartBoundsInRadius(humanoidRootPart.Position, 10)
+            if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+            local parts = workspace:GetPartBoundsInRadius(LocalPlayer.Character.HumanoidRootPart.Position, 10)
             for _, part in ipairs(parts) do
                 part.CanTouch = false
             end
         end)
-    else
-        local parts = workspace:GetDescendants()
-        for _, part in ipairs(parts) do
-            if part:IsA("BasePart") then
-                part.CanTouch = true
-            end
-        end
     end
 end
 
--- Auto Repair System
+-- Auto Repair
 local autoRepairToggled = false
 local autoEquipHammerToggled = false
 local autoRepairConnection = nil
 local lastRepairTime = 0
 local isRepairing = false
-local repairCooldown = 0.1
 
 local function equipHammer()
     local hammer = LocalPlayer.Backpack:FindFirstChild("Hammer")
     if not hammer then return false end
-
-    local success = pcall(function()
+    
+    pcall(function()
         LocalPlayer.Character.Humanoid:EquipTool(hammer)
     end)
     
-    if not success then return false end
-    
-    local attempts = 0
-    while not LocalPlayer.Character:FindFirstChild("Hammer") and attempts < 10 do
-        task.wait(0.1)
-        attempts = attempts + 1
-    end
-    
+    task.wait(0.2)
     return LocalPlayer.Character:FindFirstChild("Hammer") ~= nil
 end
 
 local function performRepair()
-    if isRepairing or not autoRepairToggled or 
-       not LocalPlayer.Character or 
-       not LocalPlayer.Character:FindFirstChild("Humanoid") or 
-       not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") or 
-       not LocalPlayer.Character:FindFirstChild("Head") then
-        return false
-    end
-
+    if isRepairing or not autoRepairToggled or not LocalPlayer.Character then return false end
+    
     local currentTime = tick()
-    if currentTime - lastRepairTime < repairCooldown then
-        return false
-    end
-
+    if currentTime - lastRepairTime < 0.1 then return false end
+    
     local hammerTool = LocalPlayer.Character:FindFirstChild("Hammer")
     
     if not hammerTool and autoEquipHammerToggled then
-        if not equipHammer() then
-            return false
-        end
+        if not equipHammer() then return false end
         hammerTool = LocalPlayer.Character:FindFirstChild("Hammer")
     end
     
-    if not hammerTool then
-        return false
-    end
-
+    if not hammerTool then return false end
+    
     isRepairing = true
-
+    
     local remoteEvent = hammerTool:FindFirstChild("RemoteEvent")
     if not remoteEvent then
         isRepairing = false
         return false
     end
-
+    
     local repairParams = RaycastParams.new()
     repairParams.IgnoreWater = true
     repairParams.FilterDescendantsInstances = {LocalPlayer.Character}
     repairParams.FilterType = Enum.RaycastFilterType.Exclude
-
-    local head = LocalPlayer.Character.Head
+    
+    local head = LocalPlayer.Character:FindFirstChild("Head")
+    if not head then
+        isRepairing = false
+        return false
+    end
+    
     local repaired = false
-
-    local success = pcall(function()
+    pcall(function()
         local direction = workspace.CurrentCamera.CFrame.LookVector
-        local raycast = workspace:Raycast(
-            head.Position,
-            direction * 8,
-            repairParams
-        )
-
+        local raycast = workspace:Raycast(head.Position, direction * 8, repairParams)
+        
         if raycast and raycast.Instance then
             local buildingHealth = raycast.Instance.Parent:FindFirstChild("BuildingHealth") or 
                                  raycast.Instance.Parent.Parent:FindFirstChild("BuildingHealth")
             local constructHealth = raycast.Instance:FindFirstChild("ConstructHealth")
-
+            
             if buildingHealth or constructHealth then
                 remoteEvent:FireServer("Repair", buildingHealth or constructHealth)
                 lastRepairTime = currentTime
@@ -997,27 +966,21 @@ local function performRepair()
             end
         end
     end)
-
-    if not success then
-        isRepairing = false
-        return false
-    end
-
+    
     isRepairing = false
     return repaired
 end
 
 local function autoRepair(Value)
     autoRepairToggled = Value
-
+    
+    if autoRepairConnection then
+        autoRepairConnection:Disconnect()
+        autoRepairConnection = nil
+    end
+    
     if autoRepairToggled then
         isRepairing = false
-        
-        if autoRepairConnection then
-            autoRepairConnection:Disconnect()
-            autoRepairConnection = nil
-        end
-
         autoRepairConnection = RunService.Heartbeat:Connect(function()
             if not autoRepairToggled then
                 if autoRepairConnection then
@@ -1027,23 +990,18 @@ local function autoRepair(Value)
                 return
             end
             
-            if tick() - lastRepairTime >= repairCooldown then
+            if tick() - lastRepairTime >= 0.1 then
                 task.spawn(function()
                     pcall(performRepair)
                 end)
             end
         end)
     else
-        if autoRepairConnection then
-            autoRepairConnection:Disconnect()
-            autoRepairConnection = nil
-        end
-        
         isRepairing = false
     end
 end
 
--- Cleanup on character death/respawn
+-- Cleanup cooldowns
 task.spawn(function()
     while true do
         task.wait(5)
@@ -1056,11 +1014,15 @@ task.spawn(function()
     end
 end)
 
+-- Character respawn handler
 LocalPlayer.CharacterAdded:Connect(function(character)
     task.wait(1)
     
     stunCooldowns = {}
     lastShoveTime = 0
+    lastAttackTime = 0
+    
+    updateFilters()
     
     if killAuraToggled or shoveAuraToggled then
         observerOnline = false
@@ -1071,15 +1033,12 @@ LocalPlayer.CharacterAdded:Connect(function(character)
         createHitBox()
     end
     
-    raycastParams.FilterDescendantsInstances = {character}
-    params.FilterDescendantsInstances = {character}
-    
     if not killbrickEnabled then
         toggleKillbrick(false)
     end
 end)
 
--- Headless Aimbot Integration
+-- Headless Aimbot
 local p = game:GetService("Players")
 local r = game:GetService("RunService")
 local l = p.LocalPlayer
@@ -1098,58 +1057,58 @@ local aimbotBossFinderConnection = nil
 local aimbotRenderConnection = nil
 
 if not g:FindFirstChild("MainFrame") then
-	local f = Instance.new("Frame")
-	f.Name = "MainFrame"
-	f.Parent = g
-	f.Size = UDim2.new(0, 200, 0, 120)
-	f.Position = UDim2.new(0, 50, 0, 150)
-	f.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	f.BackgroundTransparency = 0.3
-	f.Active = true
-	f.Draggable = true
-	f.Visible = false
+    local f = Instance.new("Frame")
+    f.Name = "MainFrame"
+    f.Parent = g
+    f.Size = UDim2.new(0, 200, 0, 120)
+    f.Position = UDim2.new(0, 50, 0, 150)
+    f.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    f.BackgroundTransparency = 0.3
+    f.Active = true
+    f.Draggable = true
+    f.Visible = false
 
-	local u = Instance.new("UICorner")
-	u.CornerRadius = UDim.new(0, 12)
-	u.Parent = f
+    local u = Instance.new("UICorner")
+    u.CornerRadius = UDim.new(0, 12)
+    u.Parent = f
 
-	local t = Instance.new("TextLabel")
-	t.Parent = f
-	t.Size = UDim2.new(1, 0, 0, 30)
-	t.Text = "Headless Horseman Lock-On"
-	t.BackgroundTransparency = 1
-	t.TextColor3 = Color3.new(1, 1, 1)
-	t.TextScaled = true
+    local t = Instance.new("TextLabel")
+    t.Parent = f
+    t.Size = UDim2.new(1, 0, 0, 30)
+    t.Text = "Headless Horseman Lock-On"
+    t.BackgroundTransparency = 1
+    t.TextColor3 = Color3.new(1, 1, 1)
+    t.TextScaled = true
 
-	local b = Instance.new("TextButton")
-	b.Name = "Toggle"
-	b.Parent = f
-	b.Size = UDim2.new(0, 80, 0, 30)
-	b.Position = UDim2.new(0, 10, 0, 40)
-	b.Text = "OFF"
-	b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	b.TextColor3 = Color3.new(1, 1, 1)
-	b.TextScaled = true
+    local b = Instance.new("TextButton")
+    b.Name = "Toggle"
+    b.Parent = f
+    b.Size = UDim2.new(0, 80, 0, 30)
+    b.Position = UDim2.new(0, 10, 0, 40)
+    b.Text = "OFF"
+    b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.TextScaled = true
 
-	local x = Instance.new("UICorner")
-	x.CornerRadius = UDim.new(0, 8)
-	x.Parent = b
+    local x = Instance.new("UICorner")
+    x.CornerRadius = UDim.new(0, 8)
+    x.Parent = b
 
-	local d = Instance.new("TextBox")
-	d.Name = "Prediction"
-	d.Parent = f
-	d.Size = UDim2.new(0, 180, 0, 30)
-	d.Position = UDim2.new(0, 10, 0, 80)
-	d.Text = "0.1"
-	d.PlaceholderText = "Prediction"
-	d.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	d.TextColor3 = Color3.new(1, 1, 1)
-	d.ClearTextOnFocus = false
-	d.TextScaled = true
+    local d = Instance.new("TextBox")
+    d.Name = "Prediction"
+    d.Parent = f
+    d.Size = UDim2.new(0, 180, 0, 30)
+    d.Position = UDim2.new(0, 10, 0, 80)
+    d.Text = "0.1"
+    d.PlaceholderText = "Prediction"
+    d.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    d.TextColor3 = Color3.new(1, 1, 1)
+    d.ClearTextOnFocus = false
+    d.TextScaled = true
 
-	local y = Instance.new("UICorner")
-	y.CornerRadius = UDim.new(0, 8)
-	y.Parent = d
+    local y = Instance.new("UICorner")
+    y.CornerRadius = UDim.new(0, 8)
+    y.Parent = d
 end
 
 local f = g.MainFrame
@@ -1157,78 +1116,76 @@ local b = f.Toggle
 local d = f.Prediction
 
 b.MouseButton1Click:Connect(function()
-	aimbotInternalToggle = not aimbotInternalToggle
-	b.Text = aimbotInternalToggle and "ON" or "OFF"
-	b.BackgroundColor3 = aimbotInternalToggle and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 40)
+    aimbotInternalToggle = not aimbotInternalToggle
+    b.Text = aimbotInternalToggle and "ON" or "OFF"
+    b.BackgroundColor3 = aimbotInternalToggle and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(40, 40, 40)
 end)
 
 d.FocusLost:Connect(function()
-	local n = tonumber(d.Text)
-	if n then
-		aimbotPrediction = n
-	end
+    local n = tonumber(d.Text)
+    if n then aimbotPrediction = n end
 end)
 
 local function startBossFinder()
-	if aimbotBossFinderConnection then
-		aimbotBossFinderConnection:Disconnect()
-	end
-	aimbotBossFinderConnection = task.spawn(function()
-		while aimbotEnabled do
-			task.wait(2)
-			if aimbotInternalToggle then
-				local s = workspace:FindFirstChild("Sleepy Hollow")
-				local m = s and s:FindFirstChild("Modes")
-				local w = m and m:FindFirstChild("Boss")
-				local k = w and w:FindFirstChild("HeadlessHorsemanBoss")
-				aimbotBoss = k and k:FindFirstChild("HeadlessHorseman")
-			else
-				aimbotBoss = nil
-			end
-		end
-		aimbotBoss = nil
-	end)
+    if aimbotBossFinderConnection then
+        task.cancel(aimbotBossFinderConnection)
+    end
+    aimbotBossFinderConnection = task.spawn(function()
+        while aimbotEnabled do
+            task.wait(2)
+            if aimbotInternalToggle then
+                local s = workspace:FindFirstChild("Sleepy Hollow")
+                local m = s and s:FindFirstChild("Modes")
+                local w = m and m:FindFirstChild("Boss")
+                local k = w and w:FindFirstChild("HeadlessHorsemanBoss")
+                aimbotBoss = k and k:FindFirstChild("HeadlessHorseman")
+            else
+                aimbotBoss = nil
+            end
+        end
+        aimbotBoss = nil
+    end)
 end
 
 local function startRenderStepped()
-	if aimbotRenderConnection then
-		aimbotRenderConnection:Disconnect()
-	end
-	aimbotRenderConnection = r.RenderStepped:Connect(function()
-		if aimbotEnabled and aimbotInternalToggle and aimbotBoss and aimbotBoss.Parent then
-			local e = aimbotBoss:FindFirstChild("Torso") or aimbotBoss:FindFirstChild("UpperTorso")
-			if e then
-				local q = e.Position + e.Velocity * aimbotPrediction
-				c.CFrame = CFrame.new(c.CFrame.Position, q)
-			end
-		end
-	end)
+    if aimbotRenderConnection then
+        aimbotRenderConnection:Disconnect()
+    end
+    aimbotRenderConnection = r.RenderStepped:Connect(function()
+        if aimbotEnabled and aimbotInternalToggle and aimbotBoss and aimbotBoss.Parent then
+            local e = aimbotBoss:FindFirstChild("Torso") or aimbotBoss:FindFirstChild("UpperTorso")
+            if e then
+                local q = e.Position + e.Velocity * aimbotPrediction
+                c.CFrame = CFrame.new(c.CFrame.Position, q)
+            end
+        end
+    end)
 end
 
 local function toggleAimbot(enabled)
-	aimbotEnabled = enabled
-	f.Visible = enabled
-	
-	if enabled then
-		startBossFinder()
-		startRenderStepped()
-	else
-		aimbotInternalToggle = false
-		b.Text = "OFF"
-		b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		aimbotBoss = nil
-		if aimbotBossFinderConnection then
-			task.cancel(aimbotBossFinderConnection)
-			aimbotBossFinderConnection = nil
-		end
-		if aimbotRenderConnection then
-			aimbotRenderConnection:Disconnect()
-			aimbotRenderConnection = nil
-		end
-	end
+    aimbotEnabled = enabled
+    f.Visible = enabled
+    
+    if enabled then
+        startBossFinder()
+        startRenderStepped()
+    else
+        aimbotInternalToggle = false
+        b.Text = "OFF"
+        b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        aimbotBoss = nil
+        if aimbotBossFinderConnection then
+            task.cancel(aimbotBossFinderConnection)
+            aimbotBossFinderConnection = nil
+        end
+        if aimbotRenderConnection then
+            aimbotRenderConnection:Disconnect()
+            aimbotRenderConnection = nil
+        end
+    end
 end
 
--- GUI Creation with Error Handling
+-- GUI Creation
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 if not Rayfield then
@@ -1271,33 +1228,18 @@ local misc_Section = misc_Tab:CreateSection("Miscellaneous Functions")
 local aimbot_Tab = Window:CreateTab("Aimbot", "crosshair")
 local aimbot_Section = aimbot_Tab:CreateSection("Headless Horseman Aimbot")
 
--- Aimbot Tab Controls
-local aimbotToggle = aimbot_Tab:CreateToggle({
+-- Aimbot Tab
+aimbot_Tab:CreateToggle({
     Name = "Headless Aimbot By Refs",
     CurrentValue = false,
     Flag = "HeadlessAimbot", 
     Callback = function(Value)
         toggleAimbot(Value)
-        if Value then
-            Rayfield:Notify({
-                Title = "Headless Aimbot",
-                Content = "Aimbot UI enabled - Lock onto the boss!",
-                Duration = 3,
-                Image = "crosshair"
-            })
-        else
-            Rayfield:Notify({
-                Title = "Headless Aimbot",
-                Content = "Aimbot UI disabled.",
-                Duration = 3,
-                Image = "crosshair"
-            })
-        end
     end
 })
 
--- Main Tab Controls
-local walkSpeed = Tab:CreateToggle({
+-- Main Tab
+Tab:CreateToggle({
     Name = "WalkSpeed Freeze",
     CurrentValue = false,
     Flag = "WalkSpeed", 
@@ -1307,22 +1249,22 @@ local walkSpeed = Tab:CreateToggle({
     end
 })
 
-local Input = Tab:CreateInput({
+Tab:CreateInput({
    Name = "WalkSpeed",
    CurrentValue = "16",
    PlaceholderText = "WalkSpeed",
    RemoveTextAfterFocusLost = false,
    Flag = "Input1",
    Callback = function(Value)
-       Value = tonumber(Value)
-       if Value then
-           walkSpeedValue = Value
-           changeWalkSpeed(Value, walkSpeedToggled)
+       local val = tonumber(Value)
+       if val then
+           walkSpeedValue = val
+           changeWalkSpeed(val, walkSpeedToggled)
        end
    end
 })
 
-local killAura = Tab:CreateToggle({
+Tab:CreateToggle({
     Name = "Kill Aura",
     CurrentValue = false,
     Flag = "KillAura", 
@@ -1342,9 +1284,7 @@ local killAura = Tab:CreateToggle({
                 
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                     local hitbox = LocalPlayer.Character.HumanoidRootPart:FindFirstChild("Hitbox")
-                    if hitbox then
-                        hitbox:Destroy()
-                    end
+                    if hitbox then hitbox:Destroy() end
                 end
             else
                 createHitBox()
@@ -1353,7 +1293,16 @@ local killAura = Tab:CreateToggle({
     end
 })
 
-local shoveAura = Tab:CreateToggle({
+Tab:CreateToggle({
+    Name = "Kill Bomber",
+    CurrentValue = false,
+    Flag = "KillBomber", 
+    Callback = function(Value)
+        killBomberToggled = Value
+    end
+})
+
+Tab:CreateToggle({
     Name = "Shove Aura",
     CurrentValue = false,
     Flag = "ShoveAura", 
@@ -1373,9 +1322,7 @@ local shoveAura = Tab:CreateToggle({
                 
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                     local hitbox = LocalPlayer.Character.HumanoidRootPart:FindFirstChild("Hitbox")
-                    if hitbox then
-                        hitbox:Destroy()
-                    end
+                    if hitbox then hitbox:Destroy() end
                 end
             else
                 createHitBox()
@@ -1384,7 +1331,7 @@ local shoveAura = Tab:CreateToggle({
     end
 })
 
-local shoveRadiusSlider = Tab:CreateSlider({
+Tab:CreateSlider({
    Name = "Shove Radius",
    Range = {1, 15},
    Increment = 1,
@@ -1396,7 +1343,7 @@ local shoveRadiusSlider = Tab:CreateSlider({
    end
 })
 
-local maxShoveSlider = Tab:CreateSlider({
+Tab:CreateSlider({
    Name = "Max Shove Per Cycle",
    Range = {1, 20},
    Increment = 1,
@@ -1408,7 +1355,19 @@ local maxShoveSlider = Tab:CreateSlider({
    end
 })
 
-local headToggle = Tab:CreateToggle({
+Tab:CreateSlider({
+   Name = "Max Kill Aura Attacks Per Frame",
+   Range = {1, 20},
+   Increment = 1,
+   Suffix = " zombies",
+   CurrentValue = killAuraMaxAttacksPerFrame,
+   Flag = "MaxKillAuraSlider",
+   Callback = function(Value)
+        setKillAuraMaxAttacksPerFrame(Value)
+   end
+})
+
+Tab:CreateToggle({
     Name = "Head Lock",
     CurrentValue = false,
     Flag = "HeadLock", 
@@ -1418,14 +1377,14 @@ local headToggle = Tab:CreateToggle({
     end
 })
 
-local Lights = Tab:CreateButton({
+Tab:CreateButton({
     Name = "Lights On (Saint Petersburg)",
     Callback = function()
         pcall(onLights)
     end
 })
 
-local autoPlay = Tab:CreateToggle({
+Tab:CreateToggle({
     Name = "Auto play",
     CurrentValue = false,
     Flag = "Autoplay", 
@@ -1434,7 +1393,7 @@ local autoPlay = Tab:CreateToggle({
     end
 })
 
-local autoRepairToggle = Tab:CreateToggle({
+Tab:CreateToggle({
     Name = "Auto Repair",
     CurrentValue = false,
     Flag = "AutoRepair",
@@ -1443,7 +1402,7 @@ local autoRepairToggle = Tab:CreateToggle({
     end
 })
 
-local autoEquipHammerToggle = Tab:CreateToggle({
+Tab:CreateToggle({
     Name = "Auto Equip Hammer",
     CurrentValue = false,
     Flag = "AutoEquipHammer",
@@ -1452,31 +1411,16 @@ local autoEquipHammerToggle = Tab:CreateToggle({
     end
 })
 
-local hitboxExpanderToggle = Tab:CreateToggle({
+Tab:CreateToggle({
     Name = "Zombie Hitbox Expander",
     CurrentValue = false,
     Flag = "HitboxExpander",
     Callback = function(Value)
         toggleHitboxExpander(Value)
-        if Value then
-            Rayfield:Notify({
-                Title = "Hitbox Expander",
-                Content = "Zombie hitboxes expanded to " .. hitboxSize .. " studs!",
-                Duration = 3,
-                Image = "crosshair"
-            })
-        else
-            Rayfield:Notify({
-                Title = "Hitbox Expander",
-                Content = "Zombie hitboxes restored to normal.",
-                Duration = 3,
-                Image = "crosshair"
-            })
-        end
     end
 })
 
-local hitboxSizeSlider = Tab:CreateSlider({
+Tab:CreateSlider({
    Name = "Zombie Hitbox Size",
    Range = {1, 30},
    Increment = 1,
@@ -1488,8 +1432,8 @@ local hitboxSizeSlider = Tab:CreateSlider({
    end
 })
 
--- Player Tab Controls
-local player_esp = player_Tab:CreateToggle({
+-- Player Tab
+player_Tab:CreateToggle({
     Name = "Medic Player ESP",
     CurrentValue = false,
     Flag = "player_esp", 
@@ -1499,7 +1443,7 @@ local player_esp = player_Tab:CreateToggle({
     end
 })
 
-local priest_esp = player_Tab:CreateToggle({
+player_Tab:CreateToggle({
     Name = "Father Infection ESP",
     CurrentValue = false,
     Flag = "father_infection", 
@@ -1509,8 +1453,8 @@ local priest_esp = player_Tab:CreateToggle({
     end
 })
 
--- ESP Tab Controls
-local esp_Runner = esp_Tab:CreateToggle({
+-- ESP Tab
+esp_Tab:CreateToggle({
     Name = "ESP Runner",
     CurrentValue = false,
     Flag = "ESP_1",
@@ -1519,7 +1463,7 @@ local esp_Runner = esp_Tab:CreateToggle({
     end
 })
 
-local esp_Bomber = esp_Tab:CreateToggle({
+esp_Tab:CreateToggle({
     Name = "ESP Bomber",
     CurrentValue = false,
     Flag = "ESP_2",
@@ -1528,7 +1472,7 @@ local esp_Bomber = esp_Tab:CreateToggle({
     end
 })
 
-local esp_Igniter = esp_Tab:CreateToggle({
+esp_Tab:CreateToggle({
     Name = "ESP Igniter",
     CurrentValue = false,
     Flag = "ESP_3",
@@ -1537,7 +1481,7 @@ local esp_Igniter = esp_Tab:CreateToggle({
     end
 })
 
-local esp_Cuirassier = esp_Tab:CreateToggle({
+esp_Tab:CreateToggle({
     Name = "ESP Cuirassier",
     CurrentValue = false,
     Flag = "ESP_4",
@@ -1546,7 +1490,7 @@ local esp_Cuirassier = esp_Tab:CreateToggle({
     end
 })
 
-local esp_Boss = esp_Tab:CreateToggle({
+esp_Tab:CreateToggle({
     Name = "ESP Boss",
     CurrentValue = false,
     Flag = "ESP_5",
@@ -1573,100 +1517,40 @@ local esp_Boss = esp_Tab:CreateToggle({
     end
 })
 
--- Misc Tab Controls
-local fullbrightToggle = misc_Tab:CreateToggle({
+-- Misc Tab
+misc_Tab:CreateToggle({
     Name = "Fullbright",
     CurrentValue = false,
     Flag = "Fullbright",
     Callback = function(Value)
         toggleFullbright(Value)
-        if Value then
-            Rayfield:Notify({
-                Title = "Fullbright",
-                Content = "Fullbright enabled - Maximum visibility!",
-                Duration = 3,
-                Image = "sun"
-            })
-        else
-            Rayfield:Notify({
-                Title = "Fullbright",
-                Content = "Fullbright disabled - Lighting restored.",
-                Duration = 3,
-                Image = "moon"
-            })
-        end
     end
 })
 
-local killbrickToggle = misc_Tab:CreateToggle({
+misc_Tab:CreateToggle({
     Name = "Killbrick Protection",
     CurrentValue = false,
     Flag = "KillbrickProtection",
     Callback = function(Value)
         toggleKillbrick(not Value)
-        if Value then
-            Rayfield:Notify({
-                Title = "Killbrick Protection",
-                Content = "Protection enabled - You are now safe from killbricks!",
-                Duration = 3,
-                Image = "shield"
-            })
-        else
-            Rayfield:Notify({
-                Title = "Killbrick Protection",
-                Content = "Protection disabled - Be careful!",
-                Duration = 3,
-                Image = "alert-triangle"
-            })
-        end
     end
 })
 
-local purchaseLeRevenant = misc_Tab:CreateButton({
+misc_Tab:CreateButton({
     Name = "Purchase Le Revenant",
     Callback = function()
-        local success, errorMsg = pcall(function()
-            local args = {[1] = "Le Revenant"}
-            game:GetService("ReplicatedStorage").Events.Customize.PurchaseEvent:FireServer(unpack(args))
-            Rayfield:Notify({
-                Title = "Purchase Attempt",
-                Content = "Attempted to purchase Le Revenant.",
-                Duration = 3,
-                Image = "shopping-cart"
-            })
+        pcall(function()
+            game:GetService("ReplicatedStorage").Events.Customize.PurchaseEvent:FireServer("Le Revenant")
         end)
-        if not success then
-            Rayfield:Notify({
-                Title = "Purchase Error",
-                Content = "Failed to purchase Le Revenant: " .. tostring(errorMsg),
-                Duration = 5,
-                Image = "alert-circle"
-            })
-        end
     end
 })
 
-local purchaseBaguette = misc_Tab:CreateButton({
+misc_Tab:CreateButton({
     Name = "Purchase Baguette",
     Callback = function()
-        local success, errorMsg = pcall(function()
-            local args = {[1] = "Baguette"}
-            game:GetService("ReplicatedStorage").Events.Customize.PurchaseEvent:FireServer(unpack(args))
-            Rayfield:Notify({
-                Title = "Purchase Attempt",
-                Content = "Attempted to purchase Baguette.",
-                Duration = 3,
-                Image = "shopping-cart"
-            })
+        pcall(function()
+            game:GetService("ReplicatedStorage").Events.Customize.PurchaseEvent:FireServer("Baguette")
         end)
-        if not success then
-            Rayfield:Notify({
-                Title = "Purchase Error",
-                Content = "Failed to purchase Baguette: " .. tostring(errorMsg),
-                Duration = 5,
-                Image = "alert-circle"
-            })
-        end
     end
 })
 
